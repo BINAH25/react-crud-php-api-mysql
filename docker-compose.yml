@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   frontend:
     build: ./frontend
@@ -6,6 +7,8 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - app_network
 
   backend:
     build: ./api
@@ -18,6 +21,8 @@ services:
       - DB_USER=root
       - DB_PASSWORD=rootpassword
       - DB_NAME=react_crud
+    networks:
+      - app_network
 
   db:
     image: mysql:8
@@ -30,9 +35,12 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "3306:3306"
+    networks:
+      - app_network
 
 volumes:
   db_data:
 
-#  - /home/user/db/mysql/init:/docker-entrypoint-initdb.d/:ro
-
+networks:
+  app_network:
+    driver: bridge
