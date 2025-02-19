@@ -19,3 +19,5 @@ CREATE TABLE IF NOT EXISTS users
 INSERT INTO users (name, email, mobile) VALUES 
 ('John Doe', 'john@example.com', 1234567890),
 ('Jane Smith', 'jane@example.com', 9876543210);
+
+-- Admin123 - RDS

@@ -10,14 +10,14 @@ export default function ListUser() {
     }, []);
 
     function getUsers() {
-        axios.get('http://localhost:5000/api/users/').then(function(response) {
+        axios.get('http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/users/').then(function(response) {
             console.log(response.data);
             setUsers(response.data);
         });
     }
 
     const deleteUser = (id) => {
-        axios.delete(`http://localhost:5000/api/user/${id}/delete`).then(function(response){
+        axios.delete(`http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/user/${id}/delete`).then(function(response){
             console.log(response.data);
             getUsers();
         });
