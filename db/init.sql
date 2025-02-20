@@ -4,7 +4,7 @@ CREATE DATABASE IF NOT EXISTS react_crud;
 USE react_crud;
 
 -- Create users table
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE  users
 (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(50),

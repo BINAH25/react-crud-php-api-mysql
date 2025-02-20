@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BASE_API_URI } from "./constants";
 
 export default function ListUser() {
 
@@ -10,14 +11,14 @@ export default function ListUser() {
     }, []);
 
     function getUsers() {
-        axios.get('http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/users/').then(function(response) {
+        axios.get(`${BASE_API_URI}/api/users/`).then(function(response) {
             console.log(response.data);
             setUsers(response.data);
         });
     }
 
     const deleteUser = (id) => {
-        axios.delete(`http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/user/${id}/delete`).then(function(response){
+        axios.delete(`${BASE_API_URI}/user/${id}/delete`).then(function(response){
             console.log(response.data);
             getUsers();
         });

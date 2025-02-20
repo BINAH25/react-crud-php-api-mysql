@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { BASE_API_URI } from "./constants";
 
 export default function ListUser() {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function ListUser() {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        axios.post('http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/user/save', inputs).then(function(response){
+        axios.post(`${BASE_API_URI}/api/user/save`, inputs).then(function(response){
             console.log(response.data);
             navigate('/');
         });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { BASE_API_URI } from "./constants";
 
 export default function ListUser() {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function ListUser() {
     }, []);
 
     function getUser() {
-        axios.get(`http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/user/${id}`).then(function(response) {
+        axios.get(`${BASE_API_URI}/api/user/${id}`).then(function(response) {
             console.log(response.data);
             setInputs(response.data);
         });
@@ -28,7 +29,7 @@ export default function ListUser() {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        axios.put(`http://lamp-stack-app-server-alb-1401351637.eu-west-1.elb.amazonaws.com/api/user/${id}/edit`, inputs).then(function(response){
+        axios.put(`${BASE_API_URI}/api/user/${id}/edit`, inputs).then(function(response){
             console.log(response.data);
             navigate('/');
         });
