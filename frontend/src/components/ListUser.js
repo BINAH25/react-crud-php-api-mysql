@@ -2,6 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BASE_API_URI } from "./constants";
+import "./styles.css";
 
 export default function ListUser() {
 
@@ -24,7 +25,7 @@ export default function ListUser() {
         });
     }
     return (
-        <div>
+        <div className="table-container">
             <h1>List Users</h1>
             <table>
                 <thead>
@@ -33,7 +34,6 @@ export default function ListUser() {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Mobile</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,10 +43,6 @@ export default function ListUser() {
                             <td>{user.name}</td>
                             <td>{user.email}</td>
                             <td>{user.mobile}</td>
-                            <td>
-                                <Link to={`user/${user.id}/edit`} style={{marginRight: "10px"}}>Edit</Link>
-                                <button onClick={() => deleteUser(user.id)}>Delete</button>
-                            </td>
                         </tr>
                     )}
                     

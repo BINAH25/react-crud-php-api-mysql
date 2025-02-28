@@ -10,10 +10,10 @@ class DbConnect {
 
     public function __construct() {
         // Fetching environment variables
-        $this->server = getenv('DB_HOST') ?: 'lamp-stack-server-app-database.cxk0w42u04ve.eu-west-1.rds.amazonaws.com';  // Default to 'mysql' if not set
+        $this->server = getenv('DB_HOST') ?: 'mysql';  // Default to 'mysql' if not set lamp-stack-server-app-database.cxk0w42u04ve.eu-west-1.rds.amazonaws.com
         $this->dbname = getenv('DB_NAME') ?: 'react_crud';
-        $this->user = getenv('DB_USER') ?: 'admin';
-        $this->pass = getenv('DB_PASSWORD') ?: 'Admin123';
+        $this->user = getenv('DB_USER') ?: 'root';
+        $this->pass = getenv('DB_PASSWORD') ?: 'rootpassword'; 
     }
 
     public function connect() {

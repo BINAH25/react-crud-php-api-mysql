@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BASE_API_URI } from "./constants";
+import "./styles.css";
 
 export default function ListUser() {
     const navigate = useNavigate();
@@ -23,43 +24,27 @@ export default function ListUser() {
         
     }
     return (
-        <div>
-            <h1>Create user</h1>
-            <form onSubmit={handleSubmit}>
-                <table cellSpacing="10">
-                    <tbody>
-                        <tr>
-                            <th>
-                                <label>Name: </label>
-                            </th>
-                            <td>
-                                <input type="text" name="name" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label>Email: </label>
-                            </th>
-                            <td> 
-                                <input type="text" name="email" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label>Mobile: </label>
-                            </th>
-                            <td>
-                                <input type="text" name="mobile" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan="2" align ="right">
-                                <button>Save</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
+        <div className="container">
+            <div className="form-card">
+                <h1>Create User</h1>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Name:</label>
+                        <input type="text" name="name" onChange={handleChange} />
+                    </div>
+                    <div className="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="email" onChange={handleChange} />
+                    </div>
+                    <div className="form-group">
+                        <label>Mobile:</label>
+                        <input type="text" name="mobile" onChange={handleChange} />
+                    </div>
+                    <div className="button-container">
+                        <button type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    )
+    );
 }
