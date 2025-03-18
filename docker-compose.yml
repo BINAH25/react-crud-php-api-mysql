@@ -3,15 +3,23 @@ version: "3.8"
 services:
   frontend:
     build: ./frontend
+    container_name: web
     ports:
       - "3000:80"
     depends_on:
       - backend
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: "docker-logs"
+        awslogs-stream: "web-logs"
+        awslogs-region: "eu-west-1"
     networks:
       - app_network
 
   backend:
     build: ./api
+    container_name: app
     ports:
       - "5000:80"
     depends_on:
@@ -21,11 +29,18 @@ services:
       - DB_USER=root
       - DB_PASSWORD=rootpassword
       - DB_NAME=react_crud
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: "docker-logs"
+        awslogs-stream: "app-logs"
+        awslogs-region: "eu-west-1"
     networks:
       - app_network
 
   db:
     image: mysql:8
+    container_name: mysql_database
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -37,6 +52,13 @@ services:
       - "3306:3306"
     networks:
       - app_network
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: "docker-logs"
+        awslogs-stream: "mysql-logs"
+        awslogs-region: "eu-west-1"
+
 
 volumes:
   db_data:
