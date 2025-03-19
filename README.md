@@ -116,14 +116,6 @@ add the following permissions to the IAM ROLE
 ![alt text](image-7.png)
 
 
-## **Security & Performance Enhancements**
-- **SSL/TLS** can be enabled using Let's Encrypt.
-- **Load Balancing** can be added using AWS ALB or NGINX upstream.
-- **Rate Limiting** can be configured in NGINX.
-- **Database Backups** should be configured for MySQL.
-
----
-
 ## **Stopping & Removing Containers**
 ```sh
     docker-compose down
