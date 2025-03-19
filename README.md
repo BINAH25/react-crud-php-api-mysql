@@ -107,8 +107,13 @@ add the following permissions to the IAM ROLE
 
 ## **Monitoring & Logging**
 - Logs from React, Apache, and MySQL are sent to AWS CloudWatch.
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
 
 - AWS CloudWatch Agent is installed to collect **memory usage and disk metrics**.
+![alt text](image-8.png)
+![alt text](image-7.png)
 
 
 ## **Security & Performance Enhancements**
@@ -121,7 +126,7 @@ add the following permissions to the IAM ROLE
 
 ## **Stopping & Removing Containers**
 ```sh
-docker-compose down
+    docker-compose down
 ```
 
 Happy Coding! 🚀
