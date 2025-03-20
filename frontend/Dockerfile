@@ -11,33 +11,42 @@ RUN npm install --legacy-peer-deps  # Prevent dependency issues
 # Copy the rest of the app's source code
 COPY . .
 
-# Build the app
+# Build the React app
 RUN npm run build
 
-# Use Nginx to serve the React app
-FROM nginx:alpine
+# Use PHP with Apache to serve the React app and API
+FROM php:8.1-apache
 
-# Create a non-root user
-RUN addgroup -g 1000 appgroup && adduser -D -u 1000 -G appgroup appuser
+# Set the working directory
+WORKDIR /var/www/html
 
-# Set working directory
-WORKDIR /usr/share/nginx/html
+# Enable necessary Apache modules
+RUN a2enmod rewrite proxy proxy_http headers
 
 # Copy the built React app from the previous stage
-COPY --from=build /app/build .
-
-# Copy Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build/ /var/www/html/
 
 # Set correct permissions
-RUN chown -R appuser:appgroup /usr/share/nginx/html
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Switch to the new user
+# Create a new non-root user
+RUN groupadd -g 1000 appuser && \
+    useradd -m -u 1000 -g appuser -s /bin/bash appuser
+
+# Set permissions and switch to non-root user
+RUN chown -R appuser:appuser /var/www/html
 USER appuser
+
+# Copy custom Apache configuration
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Enable the new site configuration
+USER root  
+RUN a2ensite 000-default.conf
 
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx (must run as root)
-USER root
-CMD ["nginx", "-g", "daemon off;"]
+# Start Apache as the non-root user
+USER appuser
+CMD ["apache2-foreground"]
