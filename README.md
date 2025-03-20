@@ -1,13 +1,13 @@
 # LAMP Stack Deployment with Reverse Proxy & Monitoring
 
-This project sets up a **React frontend**, **PHP backend (Apache on port 5000)**, **MySQL database**, and **NGINX as a reverse proxy** for handling requests. The entire application is **Dockerized**, and logs are sent to **AWS CloudWatch**, with **CloudWatch Agent** monitoring memory usage and disk.
+This project sets up a **React frontend**, **PHP backend**, **MySQL database**, and **APACHE as a web server and  reverse proxy** for handling requests. The entire application is **Dockerized**, and logs are sent to **AWS CloudWatch**, with **CloudWatch Agent** monitoring memory usage and disk.
 
 ## **Project Structure**
 
 ```
 .
-├── frontend/       # React App (Served by NGINX on port 80)
-├── api/            # PHP App (Apache listening on port 5000)
+├── frontend/       # React App (Served by Apache on port 80)
+├── api/            # PHP App (listening on port 5000)
 ├── db/             # MySQL Database in Docker on port 3306       
 ├── docker-compose.yml
 └── README.md
@@ -74,29 +74,40 @@ add the following permissions to the IAM ROLE
     git clone https://github.com/BINAH25/react-crud-php-api-mysql.git
     cd eact-crud-php-api-mysql
 ```
-## **Reverse Proxy Configuration (NGINX)**
+## **Reverse Proxy Configuration (APACHE)**
 ```sh
-    vim frontend/nginx.conf
+    vim frontend/apache.conf
 ```
 
-```nginx
-    server {
-        listen 80;
-        server_name 127.0.0.1; # replace 127.0.0.1 with your ip
+```apache
+    <VirtualHost *:80>
+    ServerName 18.202.19.63
 
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
-            try_files $uri /index.html;
-        }
+    # Serve static files from React build
+    DocumentRoot "/var/www/html"
+    <Directory "/var/www/html">
+        AllowOverride All
+        Require all granted
+        Options -Indexes +FollowSymLinks
+    </Directory>
 
-        location /api/ {
-            proxy_pass http://127.0.0.1:5000
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
-    }
+    # Proxy API requests to the backend
+    ProxyPass "/api/" "http://18.202.19.63:5000/"
+    ProxyPassReverse "/api/" "http://18.202.19.63:5000/"
+
+    # Allow CORS for API responses (optional)
+    <Location "/api/">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    </Location>
+
+    # Log errors
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
 ```
 
 ### **Build & Run Docker Containers**
