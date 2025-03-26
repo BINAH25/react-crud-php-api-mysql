@@ -12,17 +12,29 @@ pipeline {
             }
         }
 
-        stage("Build") {
+
+        stage('SonarQube analysis') {
+            environment {
+                scannerHome = tool 'sonar4.7'
+            }
             steps {
-                script {
-                    sh """
-                        cd frontend
-                        npm ci --legacy-peer-deps
-                        npm run build
-                    """
+                withSonarQubeEnv('sonar') {
+                    sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
+
+        // stage("Build") {
+        //     steps {
+        //         script {
+        //             sh """
+        //                 cd frontend
+        //                 npm ci --legacy-peer-deps
+        //                 npm run build
+        //             """
+        //         }
+        //     }
+        // }
 
     }
 
