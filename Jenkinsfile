@@ -5,6 +5,14 @@ pipeline {
         nodejs "Node"
     }
 
+    environment {
+        registryCredential = 'ecr:eu-west-1:awscreds'
+        appRegistry = "677276091734.dkr.ecr.eu-west-1.amazonaws.com/lamp-stack-frontend"
+        frontendRegistry = "https://677276091734.dkr.ecr.eu-west-1.amazonaws.com"
+        cluster = 'vprofile'
+        service = 'vprofileappsvc'
+    }
+
     stages {
         stage('Fetch code') {
             steps {
@@ -36,6 +44,37 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {
                     sh "${scannerHome}/bin/sonar-scanner"
+                }
+            }
+        }
+
+        stage('Buid App Image') {
+            steps {
+                script {
+                    dockerImage = docker.build( appRegistry + ":$BUILD_NUMBER", "./frontend/")
+                }
+            }
+        }
+
+
+        stage('Scan Image with Trivy') {
+            steps {
+                script {
+                    sh """
+                        trivy image --format table --severity HIGH,CRITICAL ${appRegistry}:$BUILD_NUMBER || exit 1
+                    """
+                }
+            }
+        }
+
+
+        stage('Upload Image to ECR') {
+            steps {
+                script {
+                    docker.withRegistry( frontendRegistry, registryCredential ){
+                        dockerImage.push("$BUILD_NUMBER")
+                        dockerImage.push('latest')
+                    }
                 }
             }
         }
