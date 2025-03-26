@@ -1,12 +1,12 @@
-# Use Node.js for building the React app
-FROM node:18 AS build
+# First stage: Build React app using a minimal Node.js image
+FROM node:22-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps  # Prevent dependency issues
+RUN npm ci --legacy-peer-deps  # Ensures a clean, reproducible install
 
 # Copy the rest of the app's source code
 COPY . .
@@ -14,39 +14,31 @@ COPY . .
 # Build the React app
 RUN npm run build
 
-# Use PHP with Apache to serve the React app and API
-FROM php:8.1-apache
+# Second stage: Use nginx to serve the built frontend
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /var/www/html
-
-# Enable necessary Apache modules
-RUN a2enmod rewrite proxy proxy_http headers
-
-# Copy the built React app from the previous stage
-COPY --from=build /app/build/ /var/www/html/
-
-# Set correct permissions
-RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+# Set working directory
+WORKDIR /usr/share/nginx/html
 
 # Create a new non-root user
-RUN groupadd -g 1000 appuser && \
-    useradd -m -u 1000 -g appuser -s /bin/bash appuser
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser -s /bin/bash appuser
 
-# Set permissions and switch to non-root user
-RUN chown -R appuser:appuser /var/www/html
+# Copy build output from the previous stage
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# give permissions for necessary directories
+RUN chown -R appuser:appuser /etc/nginx/conf.d/default.conf /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx \
+    && chmod -R 777 /var/cache/nginx /var/run /var/log/nginx
+
+# Switch to the new user
 USER appuser
-
-# Copy custom Apache configuration
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
-
-# Enable the new site configuration
-USER root  
-RUN a2ensite 000-default.conf
 
 # Expose port 80
 EXPOSE 80
 
-# Start Apache as the non-root user
-USER appuser
-CMD ["apache2-foreground"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
