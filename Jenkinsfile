@@ -12,6 +12,22 @@ pipeline {
             }
         }
 
+        stage('Check for frontend changes') {
+            steps {
+                script {
+                    def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
+                    def frontendChanged = changedFiles.split("\n").any { it.startsWith("frontend/") }
+                    
+                    if (!frontendChanged) {
+                        echo "No changes detected in frontend. Skipping build."
+                        currentBuild.result = 'SUCCESS'
+                        error("Skipping remaining stages.")  // Stop pipeline execution
+                    } else {
+                        echo "Changes detected in frontend. Proceeding with the build."
+                    }
+                }
+            }
+        }
 
         stage('SonarQube analysis') {
             environment {
@@ -35,7 +51,5 @@ pipeline {
         //         }
         //     }
         // }
-
     }
-
 }
