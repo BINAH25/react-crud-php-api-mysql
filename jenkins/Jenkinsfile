@@ -9,8 +9,8 @@ pipeline {
         registryCredential = 'ecr:eu-west-1:awscreds'
         appRegistry = "677276091734.dkr.ecr.eu-west-1.amazonaws.com/lamp-stack-frontend"
         frontendRegistry = "https://677276091734.dkr.ecr.eu-west-1.amazonaws.com"
-        cluster = 'vprofile'
-        service = 'vprofileappsvc'
+        cluster = 'frontend-cluster'
+        service = 'frontend-cluster-service'
     }
 
     stages {
@@ -79,16 +79,12 @@ pipeline {
             }
         }
 
-        // stage("Build") {
-        //     steps {
-        //         script {
-        //             sh """
-        //                 cd frontend
-        //                 npm ci --legacy-peer-deps
-        //                 npm run build
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Deploy to ecs') {
+            steps {
+                withAWS(credentials: 'awscreds', region: 'eu-west-1') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                }
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@ RUN chown -R appuser:appuser /etc/nginx/conf.d/default.conf /usr/share/nginx/htm
     && chmod -R 777 /var/cache/nginx /var/run /var/log/nginx
 
 # Switch to the new user
-USER appuser
+USER root
 
 # Expose port 80
 EXPOSE 80
