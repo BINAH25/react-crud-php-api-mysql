@@ -40,7 +40,7 @@ class DbConnect {
 
     public function connect() {
         try {
-            $dsn = 'mysql:host=' . $this->server . ';port=' . $this->port . ';dbname=' . $this->dbname;
+            $dsn = 'mysql:host=' . $this->server . ';dbname=' . $this->dbname;
             $conn = new PDO($dsn, $this->user, $this->pass);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conn;
