@@ -10,6 +10,7 @@ class DbConnect {
     private $user;
     private $pass;
 
+    
     public function __construct() {
         $secretName = "lamp-stack-database-secret"; 
         $region = "eu-west-1"; 
