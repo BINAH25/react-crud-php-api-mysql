@@ -1,24 +1,47 @@
 <?php
-/**
-* Database Connection
-*/
+require 'vendor/autoload.php';
+
+use Aws\SecretsManager\SecretsManagerClient;
+use Aws\Exception\AwsException;
+
 class DbConnect {
-    private $server = '';
-    private $dbname = '';
-    private $user = '';
-    private $pass = '';
+    private $server;
+    private $dbname;
+    private $user;
+    private $pass;
 
     public function __construct() {
-        // Fetching environment variables
-        $this->server = getenv('DB_HOST') ?: 'db';  // Default to 'mysql' if not set lamp-stack-server-app-database.cxk0w42u04ve.eu-west-1.rds.amazonaws.com
-        $this->dbname = getenv('DB_NAME') ?: 'react_crud';
-        $this->user = getenv('DB_USER') ?: 'root';
-        $this->pass = getenv('DB_PASSWORD') ?: 'password'; 
+        $secretName = "lamp-stack-database-secret"; 
+        $region = "eu-west-1"; 
+
+        try {
+            $client = new SecretsManagerClient([
+                'region' => $region,
+                'version' => 'latest',
+            ]);
+
+            $result = $client->getSecretValue([
+                'SecretId' => $secretName,
+            ]);
+
+            if (isset($result['SecretString'])) {
+                
+                $secrets = json_decode($result['SecretString'], true);
+
+                $this->server = $secrets['host'] ?? 'mysql';
+                $this->dbname = $secrets['dbname'] ?? 'react_crud';
+                $this->user = $secrets['username'] ?? 'root';
+                $this->pass = $secrets['password'] ?? 'rootpassword';
+            }
+        } catch (AwsException $e) {
+            echo "Secrets Manager Error: " . $e->getMessage();
+        }
     }
 
     public function connect() {
         try {
-            $conn = new PDO('mysql:host=' .$this->server .';dbname=' . $this->dbname, $this->user, $this->pass);
+            $dsn = 'mysql:host=' . $this->server . ';port=' . $this->port . ';dbname=' . $this->dbname;
+            $conn = new PDO($dsn, $this->user, $this->pass);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conn;
         } catch (\Exception $e) {
