@@ -18,6 +18,7 @@ Before starting, ensure you have the following:
 - **Jenkins**: install Jenkins for continuous integration and deployment
 - **Sonarqube**: install sonarqube for code analysis
 
+
 ### IAM Permissions
 Ensure your IAM user or role has the necessary permissions for the following AWS services:
 - **ECS** (Elastic Container Service)
@@ -28,7 +29,7 @@ Ensure your IAM user or role has the necessary permissions for the following AWS
 The project includes a Jenkins pipeline that automates the build and deployment process. The pipeline follows these stages:
 
 1. **Fetch Code**: jenkins Pulls the latest code from the GitHub repository.
-2. **Check for Backend Changes**: Identifies changes in the `api/` directory to determine if a rebuild is necessary.
+2. **Check for Backend Changes**: Identifies changes in the `api/`  or `frontend/` directory to determine if a rebuild is necessary.
 3. **SonarQube Analysis**: Runs SonarQube for static code analysis.
 4. **Build App Image**: Builds a Docker image for the backend API.
 5. **Scan Image with Trivy**: Scans the Docker image for vulnerabilities.
@@ -53,7 +54,12 @@ aws configure
   - Pipeline
   - Docker Pipeline
   - AWS Credentials
-  - SonarQube
+  - Amazon ECR plugin
+  - Amazon Web Services SDK
+  - SonarQube Scanner
+  - Pipeline: AWS Steps
+  - Pipeline Utility Steps
+  - NodeJS
 - Add AWS credentials to Jenkins.
 
 ### 4. Define Jenkins Pipeline Script
