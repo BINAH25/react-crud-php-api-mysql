@@ -42,6 +42,12 @@ services:
     #     awslogs-stream: "mysql-logs"
     #     awslogs-region: "eu-west-1"
 
+# Internet -> frontend alb -> frontend ECS-> backend alb -> backend ECS -> data layer
+
+# Internet -> frontend alb-SG -> frontend ECS-SG -> backend alb-SG -> backend ECS-SG -> database-SG
+
+
+
 
 volumes:
   db_data:

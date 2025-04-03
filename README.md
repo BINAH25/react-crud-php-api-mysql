@@ -1,135 +1,76 @@
-# LAMP Stack Deployment with Reverse Proxy & Monitoring
+# LAMP Stack Deployment on Amazon ECS
 
-This project sets up a **React frontend**, **PHP backend**, **MySQL database**, and **APACHE as a web server and  reverse proxy** for handling requests. The entire application is **Dockerized**, and logs are sent to **AWS CloudWatch**, with **CloudWatch Agent** monitoring memory usage and disk.
+## Project Overview
+This project focuses on deploying a containerized LAMP (Linux, Apache, MySQL, PHP) application to Amazon Elastic Container Service (ECS). The ECS environment ensures scalability, management, and orchestration of containers, providing high availability, reliability, and flexibility.
 
-## **Project Structure**
+## Prerequisites
+Before starting, ensure you have the following:
 
-```
-.
-├── frontend/       # React App (Served by Apache on port 80)
-├── api/            # PHP App (listening on port 5000)
-├── db/             # MySQL Database in Docker on port 3306       
-├── docker-compose.yml
-└── README.md
-```
+### AWS Account
+- An AWS account with appropriate permissions to deploy resources in ECS, ECR, and other AWS services.
 
-## **AWS EC2 Deployment Steps**
+### Docker Knowledge
+- Familiarity with Docker to build and containerize the LAMP application.
 
-### **1. Launch an EC2 Instance**
-- Use **Ubuntu 20.04+**.
-- Choose an instance type (`t2.micro` for testing, `t3.medium` or higher for production).
-- Allow inbound rules for **HTTP (80)**, and **SSH (22)** and **Custom TCP (5000)**.
+### Required Tools
+- **AWS CLI**: Install and configure AWS CLI to interact with AWS services.
+- **Docker**: Install Docker for containerization.
+- **Jenkins**: install Jenkins for continuous integration and deployment
+- **Sonarqube**: install sonarqube for code analysis
 
-### **2. Create IAM Role And Attach it to the Instance**
-add the following permissions to the IAM ROLE
-- `CloudWatchFullAccess` permissions policy.
-- `AmazonSSMManagedInstanceCore` permissions policy.
-- `CloudWatchAgentServerPolicy` permissions policy.
-- `AmazonEC2FullAccess` permissions policy.
+### IAM Permissions
+Ensure your IAM user or role has the necessary permissions for the following AWS services:
+- **ECS** (Elastic Container Service)
+- **ECR** (Elastic Container Registry)
+- **CloudWatch** (Monitoring and Logging)
 
-### **3. Creation of Cloudwatch Log-group and log-stream**
-- Log Group Name **docker-logs**
-- log-stream Name **app-logs**
-- log-stream Name **web-logs**
-- log-stream Name **mysql-logs**
+## Deployment Pipeline
+The project includes a Jenkins pipeline that automates the build and deployment process. The pipeline follows these stages:
+
+1. **Fetch Code**: jenkins Pulls the latest code from the GitHub repository.
+2. **Check for Backend Changes**: Identifies changes in the `api/` directory to determine if a rebuild is necessary.
+3. **SonarQube Analysis**: Runs SonarQube for static code analysis.
+4. **Build App Image**: Builds a Docker image for the backend API.
+5. **Scan Image with Trivy**: Scans the Docker image for vulnerabilities.
+6. **Upload Image to ECR**: Pushes the Docker image to AWS Elastic Container Registry (ECR).
+7. **Deploy to ECS**: Updates the ECS service with the new image, triggering a new deployment.
+
 ![alt text](image.png)
-![alt text](image-1.png)
 
-### **4. Configure CloudWatch agent to collect memory usage and disk metrics**
-- Select your instance,Monitoring tab and click Configure CloudWatch agent
-![alt text](image-2.png)
-- Select Memory and Disk 
-![alt text](image-3.png)
-
-### **5. Connect to the Instance**
-
+## How to Set Up the Pipeline
+### 1. Clone the Repository
 ```sh
-    ssh -i your-key.pem ubuntu@your-ec2-public-ip
+git clone https://github.com/BINAH25/react-crud-php-api-mysql.git
 ```
-## Install Required Packages
+
+### 2. Configure AWS CLI
 ```sh
-    for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
-    # Add Docker's official GPG key:
-    sudo apt-get update
-    sudo apt-get install ca-certificates curl
-    sudo install -m 0755 -d /etc/apt/keyrings
-    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-    # Add the repository to Apt sources:
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
-## Install Docker and Docker Compose
-```sh
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo apt-get install docker-compose
+aws configure
 ```
 
-## Clone the Repository
-```sh
-    git clone https://github.com/BINAH25/react-crud-php-api-mysql.git
-    cd eact-crud-php-api-mysql
-```
-## **Reverse Proxy Configuration (APACHE)**
-```sh
-    vim frontend/apache.conf
-```
+### 3. Set Up Jenkins and Required Plugins
+- Install Jenkins and the following plugins:
+  - Pipeline
+  - Docker Pipeline
+  - AWS Credentials
+  - SonarQube
+- Add AWS credentials to Jenkins.
 
-```apache
-    <VirtualHost *:80>
-    ServerName 18.202.19.63
+### 4. Define Jenkins Pipeline Script
+- Configure `Jenkinsfile` as described in the project.
 
-    # Serve static files from React build
-    DocumentRoot "/var/www/html"
-    <Directory "/var/www/html">
-        AllowOverride All
-        Require all granted
-        Options -Indexes +FollowSymLinks
-    </Directory>
+### 5. Run the Pipeline
+- Trigger the Jenkins pipeline to deploy the application.
 
-    # Proxy API requests to the backend
-    ProxyPass "/api/" "http://18.202.19.63:5000/"
-    ProxyPassReverse "/api/" "http://18.202.19.63:5000/"
+## Monitoring and Logging
+- Use **AWS CloudWatch** for logs and monitoring ECS tasks.
+- Enable **CloudTrail** for AWS activity logs.
 
-    # Allow CORS for API responses (optional)
-    <Location "/api/">
-        Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-        Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    </Location>
+## Security Best Practices
+- Use **IAM roles** for ECS tasks to control permissions securely.
+- Store **sensitive data** (e.g., database credentials) in **AWS Secrets Manager** 
+- Enable **image scanning** in ECR to detect vulnerabilities before deployment.
 
-    # Log errors
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+## Conclusion
+This project provides a structured approach to deploying a containerized LAMP stack on AWS ECS with a CI/CD pipeline. By leveraging Jenkins, Docker, and AWS services, the deployment process is automated, secure, and scalable.
 
-</VirtualHost>
-
-```
-
-### **Build & Run Docker Containers**
-```sh
-    docker-compose up --build -d
-```
-
-
-## **Monitoring & Logging**
-- Logs from React, Apache, and MySQL are sent to AWS CloudWatch.
-![alt text](image-4.png)
-![alt text](image-5.png)
-![alt text](image-6.png)
-
-- AWS CloudWatch Agent is installed to collect **memory usage and disk metrics**.
-![alt text](image-8.png)
-![alt text](image-7.png)
-
-
-## **Stopping & Removing Containers**
-```sh
-    docker-compose down
-```
-
-Happy Coding! 🚀
