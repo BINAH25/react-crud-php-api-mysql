@@ -36,6 +36,9 @@ The project includes a Jenkins pipeline that automates the build and deployment 
 6. **Upload Image to ECR**: Pushes the Docker image to AWS Elastic Container Registry (ECR).
 7. **Deploy to ECS**: Updates the ECS service with the new image, triggering a new deployment.
 
+![alt text](image-1.png)
+
+
 ![alt text](image.png)
 
 ## How to Set Up the Pipeline
